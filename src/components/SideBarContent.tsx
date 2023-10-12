@@ -18,33 +18,51 @@ interface MenuData {
 }
 
 const SideBar: React.FC = () => {
-  const { entryStore, setSubContainer, setSubContainerEntries } =
-    useContext(SideBarContext);
+  const { entryStore, setSubContainer, setSubContainerEntries } = useContext(SideBarContext);
+
+  // Specify the menus to display when landing on the dashboard
+  const initialMenusToDisplay = [
+    "Finfinancials",
+    "Inventory",
+    "File Tracker",
+    "Human Resource",
+    "Payroll",
+    "Global Administartion",
+    "Consolidated Reports",
+  ];
+
+  // Create state to store the menus to display and the open/closed state of submenus
+  const [menusToDisplay, setMenusToDisplay] = useState(initialMenusToDisplay);
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+
+  // Function to toggle the submenu
+  const toggleSubmenu = (menuLabel: string) => {
+    if (openSubmenu === menuLabel) {
+      setOpenSubmenu(null);
+    } else {
+      setOpenSubmenu(menuLabel);
+    }
+  };
 
   return (
     <div>
       <List>
-        {entryStore && entryStore.map(menus=>{
-
-
-
-          return(
-           <div className="mx-4">
-           <div className="p-2 text-center font-semibold">{menus.label}</div>
-           {
-            menus.submenu.map(subEntry=>{
-              return(
-                <SideNavRow text={subEntry.label} entries={subEntry.submenu}/>
-              )
-            })
-           }
-           
-           <hr />
-           </div>
-            
-          )
-        })}
-       
+        {entryStore &&
+          entryStore
+            .filter(menu => menusToDisplay.includes(menu.label))
+            .map(menu => (
+              <div className="mx-4 " key={menu.label}>
+                <ListItemButton onClick={() => toggleSubmenu(menu.label)}>
+                  <ListItemText primary={menu.label} />
+                </ListItemButton>
+                <Collapse in={openSubmenu === menu.label}>
+                  {menu.submenu.map(subEntry => (
+                    <SideNavRow text={subEntry.label} entries={subEntry.submenu} key={subEntry.label} />
+                  ))}
+                </Collapse>
+        
+              </div>
+            ))}
       </List>
     </div>
   );
